@@ -2,7 +2,7 @@
   "name": "@hexlet/code",
   "version": "0.0.1",
   "description": "[![Actions Status](https://github.com/dimidroll450/frontend-project-lvl3/workflows/hexlet-check/badge.svg)](https://github.com/dimidroll450/frontend-project-lvl3/actions)",
-  "main": "./src/init.js",
+  "main": "./src/application.js",
   "scripts": {
     "test": "jest --colors"
   },
