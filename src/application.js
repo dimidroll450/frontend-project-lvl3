@@ -1,4 +1,5 @@
 import * as yup from 'yup';
+import { uniqueId } from 'lodash';
 import axios from 'axios';
 import parser from './parser';
 import watch from './watch';
@@ -7,12 +8,17 @@ const routes = {
   host: 'https://hexlet-allorigins.herokuapp.com/get?url=',
 };
 
-const validateURL = (url, feeds) => {
-  const urls = feeds.map((feed) => feed.url);
+const errorsMessage = {
+  url: 'Ссылка должна быть валидным URL',
+  dublicate: 'RSS уже существует',
+  invalidData: 'Ресурс не содержит валидный RSS',
+};
+
+const validateURL = (url, urls) => {
   const schema = yup
     .string()
-    .url('Ссылка должна быть валидным URL')
-    .notOneOf(urls, 'RSS уже существует')
+    .url(errorsMessage.url)
+    .notOneOf(urls, errorsMessage.dublicate)
     .required();
 
   try {
@@ -25,12 +31,12 @@ const validateURL = (url, feeds) => {
 
 export default () => {
   const state = {
+    urls: [],
     feeds: [],
     posts: [],
     feedback: null,
     form: {
-      input: 'enabled',
-      button: 'enabled',
+      proccessState: 'filling',
       url: '',
       valid: 'valid',
     },
@@ -38,7 +44,7 @@ export default () => {
 
   const elements = {
     form: document.querySelector('.rss-form'),
-    input: document.querySelector('.rss-form input[type="url"]'),
+    input: document.querySelector('.rss-form input[aria-label="url"]'),
     btn: document.querySelector('.rss-form button[aria-label="add"]'),
     feedback: document.querySelector('.feedback'),
     feeds: document.querySelector('.feeds'),
@@ -51,27 +57,35 @@ export default () => {
   const formHandler = (target) => {
     const input = target.querySelector('input');
     const url = input.value.trim();
-    const check = validateURL(url, state.feeds);
+    watchState.form.url = url;
+    const check = validateURL(url, watchState.urls);
 
     if (check === null) {
+      watchState.form.valid = true;
+      watchState.feedback = '';
+      watchState.form.proccessState = 'sending';
+
       axios.get(routes.host + url)
         .then((response) => {
-          const parse = parser(response.data.contents);
+          const key = uniqueId();
+          const parse = parser(response.data.contents, key);
           const { feed, posts } = parse;
 
-          watchState.posts = [...watchState.posts, ...posts];
-          watchState.feeds.push(feed);
+          watchState.posts = [...posts, ...watchState.posts];
+          watchState.feeds.unshift(feed);
+          watchState.urls.unshift(url);
           watchState.form.url = '';
-          watchState.form.valid = true;
           watchState.feedback = 'RSS успешно загружен';
+          watchState.form.proccessState = 'filling';
         })
         .catch(() => {
-          watchState.valid = false;
+          watchState.form.valid = false;
           watchState.form.url = url;
-          watchState.feedback = 'Ресурс не содержит валидный RSS';
+          watchState.form.proccessState = 'filling';
+          watchState.feedback = errorsMessage.invalidData;
         });
     } else {
-      watchState.valid = false;
+      watchState.form.valid = false;
       watchState.feedback = check;
     }
   };
@@ -79,7 +93,6 @@ export default () => {
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
-    e.stopImmediatePropagation();
 
     const { target } = e;
     formHandler(target);

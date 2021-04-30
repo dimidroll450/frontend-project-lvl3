@@ -13,10 +13,8 @@ const generateData = (element, key, parent = '') => {
   return result;
 };
 
-export default (data) => {
+export default (data, key = '') => {
   const parsed = parseToXml(data);
-
-  const key = 'key';
   const feed = generateData(parsed, key, 'channel');
   const items = parsed.querySelectorAll('item');
   const arrItems = Array.prototype.slice.call(items);

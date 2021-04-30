@@ -29,7 +29,7 @@ const getFixturePath = (filename) => path.resolve(process.cwd(), '__tests__/__fi
 const readFile = (filename) => fs.readFileSync(getFixturePath(filename), 'utf-8').trim();
 
 test('right parse', () => {
-  const actual = parser(readFile('example'));
+  const actual = parser(readFile('example'), 'key');
 
   expect(actual).toMatchObject(recieved);
 });
