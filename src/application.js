@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import { uniqueId } from 'lodash';
+import * as _ from 'lodash';
 import axios from 'axios';
 import parser from './parser';
 import watch from './watch';
@@ -29,6 +29,22 @@ const validateURL = (url, urls) => {
   }
 };
 
+const addId = (data) => {
+  const newData = _.cloneDeep(data);
+  newData.key = _.uniqueId();
+  return newData;
+};
+
+const addIdParsedData = (data) => {
+  const oldFeed = data.feed;
+  const oldPosts = data.posts;
+
+  const feed = addId(oldFeed);
+  const posts = oldPosts.map((post) => addId(post));
+
+  return { feed, posts };
+};
+
 export default () => {
   const state = {
     urls: [],
@@ -49,11 +65,13 @@ export default () => {
     feedback: document.querySelector('.feedback'),
     feeds: document.querySelector('.feeds'),
     posts: document.querySelector('.posts'),
+    modalTitle: document.querySelector('.modal-title'),
+    modalBody: document.querySelector('.modal-body'),
+    modalBtnRead: document.querySelector('#read-completely'),
   };
 
   const watchState = watch(state, elements);
 
-  // ================ Protothype ============================
   const formHandler = (target) => {
     const input = target.querySelector('input');
     const url = input.value.trim();
@@ -67,9 +85,9 @@ export default () => {
 
       axios.get(routes.host + url)
         .then((response) => {
-          const key = uniqueId();
-          const parse = parser(response.data.contents, key);
-          const { feed, posts } = parse;
+          const parse = parser(response.data.contents);
+          const idData = addIdParsedData(parse);
+          const { feed, posts } = idData;
 
           watchState.posts = [...posts, ...watchState.posts];
           watchState.feeds.unshift(feed);
@@ -89,7 +107,18 @@ export default () => {
       watchState.feedback = check;
     }
   };
-  // ============================= end ========================
+
+  elements.posts.addEventListener('click', (e) => {
+    const { target } = e;
+    const key = target.getAttribute('data-key');
+    if (key === null) return;
+
+    const index = _.findIndex(watchState.posts, (o) => o.key === key);
+    const data = watchState.posts[index];
+    elements.modalTitle.textContent = data.title;
+    elements.modalBody.textContent = data.description;
+    elements.modalBtnRead.href = data.url;
+  });
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();

@@ -18,16 +18,37 @@ const makeFeed = (feed) => {
   return item;
 };
 
+const makeModalButton = (key) => {
+  const button = document.createElement('button');
+  button.classList.add('btn', 'btn-primary');
+  button.setAttribute('type', 'button');
+  button.setAttribute('data-toggle', 'modal');
+  button.setAttribute('data-target', '#modal');
+  button.setAttribute('data-key', `${key}`);
+  button.textContent = 'Просмотр';
+
+  button.addEventListener('click', () => {
+
+  });
+
+  return button;
+};
+
 const makePost = (post) => {
-  const { url, title } = post;
+  const { url, title, key } = post;
   const item = document.createElement('li');
-  item.classList.add('list-group-item');
+  item.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start');
 
   const link = document.createElement('a');
   link.classList.add('font-weight-bold');
+  link.setAttribute('target', '_blank');
   link.textContent = title;
   link.href = url;
+
+  const button = makeModalButton(key);
+
   item.append(link);
+  item.append(button);
   return item;
 };
 
@@ -43,6 +64,7 @@ const renderFeeds = (state, feeds) => {
   if (oldList) {
     feeds.replaceChild(list, oldList);
   } else {
+    feeds.append(makeHeaderNode('h2', 'Фиды'));
     feeds.append(list);
   }
 };
@@ -59,32 +81,32 @@ const renderPosts = (state, posts) => {
   if (oldList) {
     posts.replaceChild(list, oldList);
   } else {
+    posts.append(makeHeaderNode('h2', 'Посты'));
     posts.append(list);
   }
 };
 
-export default (state, elements) => onChange(state, (path) => {
+export default (state, elements) => onChange(state, (path, value) => {
   const { input, feedback, btn } = elements;
-  input.value = state.form.url;
-  feedback.textContent = state.feedback;
 
-  if (elements.feeds.childNodes.length === 0 && state.feeds.length !== 0) {
-    elements.feeds.append(makeHeaderNode('h2', 'Фиды'));
+  switch (path) {
+    case 'feeds':
+      renderFeeds(state, elements.feeds);
+      break;
+    case 'posts':
+      renderPosts(state, elements.posts);
+      break;
+    case 'form.url':
+      input.value = state.form.url;
+      break;
+    case 'feedback':
+      feedback.textContent = state.feedback;
+      break;
+    default:
+      break;
   }
 
-  if (elements.posts.childNodes.length === 0 && state.posts.length !== 0) {
-    elements.posts.append(makeHeaderNode('h2', 'Посты'));
-  }
-
-  if (path === 'feeds') {
-    renderFeeds(state, elements.feeds);
-  }
-
-  if (path === 'posts') {
-    renderPosts(state, elements.posts);
-  }
-
-  switch (state.form.proccessState) {
+  switch (value) {
     case 'filling':
       btn.disabled = false;
       input.readOnly = false;
@@ -93,17 +115,15 @@ export default (state, elements) => onChange(state, (path) => {
       btn.disabled = true;
       input.readOnly = true;
       break;
+    case false:
+      elements.feedback.classList.add('text-danger');
+      elements.input.classList.add('is-invalid');
+      break;
+    case true:
+      elements.feedback.classList.remove('text-danger');
+      elements.input.classList.remove('is-invalid');
+      break;
     default:
-      throw new Error('Unknown state');
-  }
-
-  if (!state.form.valid) {
-    elements.feedback.classList.add('text-danger');
-    elements.input.classList.add('is-invalid');
-  }
-
-  if (state.form.valid) {
-    elements.feedback.classList.remove('text-danger');
-    elements.input.classList.remove('is-invalid');
+      break;
   }
 });
