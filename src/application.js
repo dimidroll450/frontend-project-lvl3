@@ -1,6 +1,8 @@
 import * as yup from 'yup';
 import * as _ from 'lodash';
+import i18next from 'i18next';
 import axios from 'axios';
+import resources from './locales';
 import parser from './parser';
 import watch from './watch';
 
@@ -8,10 +10,16 @@ const routes = {
   host: 'https://hexlet-allorigins.herokuapp.com/get?url=',
 };
 
+i18next.init({
+  lng: window.navigator.language,
+  debug: false,
+  resources,
+});
+
 const errorsMessage = {
-  url: 'Ссылка должна быть валидным URL',
-  dublicate: 'RSS уже существует',
-  invalidData: 'Ресурс не содержит валидный RSS',
+  url: i18next.t('errors.url'),
+  dublicate: i18next.t('errors.dublicate'),
+  invalidData: i18next.t('errors.invalidData'),
 };
 
 const validateURL = (url, urls) => {
@@ -56,6 +64,11 @@ export default () => {
       url: '',
       valid: 'valid',
     },
+    modal: {
+      title: '',
+      description: '',
+      url: '',
+    },
   };
 
   const elements = {
@@ -68,9 +81,13 @@ export default () => {
     modalTitle: document.querySelector('.modal-title'),
     modalBody: document.querySelector('.modal-body'),
     modalBtnRead: document.querySelector('#read-completely'),
+    modalDismiss: document.querySelector('#close'),
   };
 
   const watchState = watch(state, elements);
+
+  elements.modalBtnRead.textContent = i18next.t('buttons.read');
+  elements.modalDismiss.textContent = i18next.t('buttons.close');
 
   const formHandler = (target) => {
     const input = target.querySelector('input');
@@ -93,7 +110,7 @@ export default () => {
           watchState.feeds.unshift(feed);
           watchState.urls.unshift(url);
           watchState.form.url = '';
-          watchState.feedback = 'RSS успешно загружен';
+          watchState.feedback = i18next.t('success');
           watchState.form.proccessState = 'filling';
         })
         .catch(() => {
@@ -115,9 +132,9 @@ export default () => {
 
     const index = _.findIndex(watchState.posts, (o) => o.key === key);
     const data = watchState.posts[index];
-    elements.modalTitle.textContent = data.title;
-    elements.modalBody.textContent = data.description;
-    elements.modalBtnRead.href = data.url;
+    watchState.modal.title = data.title;
+    watchState.modal.description = data.description;
+    watchState.modal.url = data.url;
   });
 
   elements.form.addEventListener('submit', (e) => {
@@ -126,8 +143,4 @@ export default () => {
     const { target } = e;
     formHandler(target);
   });
-};
-
-export {
-  validateURL,
 };

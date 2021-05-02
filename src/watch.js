@@ -1,4 +1,5 @@
 import onChange from 'on-change';
+import i18next from 'i18next';
 
 const makeHeaderNode = (type, text) => {
   const element = document.createElement(`${type}`);
@@ -25,7 +26,7 @@ const makeModalButton = (key) => {
   button.setAttribute('data-toggle', 'modal');
   button.setAttribute('data-target', '#modal');
   button.setAttribute('data-key', `${key}`);
-  button.textContent = 'Просмотр';
+  button.textContent = i18next.t('buttons.show');
 
   button.addEventListener('click', () => {
 
@@ -64,7 +65,7 @@ const renderFeeds = (state, feeds) => {
   if (oldList) {
     feeds.replaceChild(list, oldList);
   } else {
-    feeds.append(makeHeaderNode('h2', 'Фиды'));
+    feeds.append(makeHeaderNode('h2', i18next.t('headers.feeds')));
     feeds.append(list);
   }
 };
@@ -81,13 +82,15 @@ const renderPosts = (state, posts) => {
   if (oldList) {
     posts.replaceChild(list, oldList);
   } else {
-    posts.append(makeHeaderNode('h2', 'Посты'));
+    posts.append(makeHeaderNode('h2', i18next.t('headers.posts')));
     posts.append(list);
   }
 };
 
 export default (state, elements) => onChange(state, (path, value) => {
-  const { input, feedback, btn } = elements;
+  const {
+    input, feedback, btn, modalBtnRead, modalTitle, modalBody,
+  } = elements;
 
   switch (path) {
     case 'feeds':
@@ -125,5 +128,21 @@ export default (state, elements) => onChange(state, (path, value) => {
       break;
     default:
       break;
+  }
+
+  if (path.includes('modal')) {
+    switch (path) {
+      case 'modal.title':
+        modalTitle.textContent = state.modal.title;
+        break;
+      case 'modal.description':
+        modalBody.textContent = state.modal.description;
+        break;
+      case 'modal.url':
+        modalBtnRead.href = state.modal.url;
+        break;
+      default:
+        break;
+    }
   }
 });
