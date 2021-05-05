@@ -6,6 +6,8 @@ import resources from './locales';
 import parser from './parser';
 import watch from './watch';
 
+const timeToCheck = 5000;
+
 const routes = {
   host: 'https://hexlet-allorigins.herokuapp.com/get?url=',
 };
@@ -53,6 +55,37 @@ const addIdParsedData = (data) => {
   return { feed, posts };
 };
 
+const get = (url) => {
+  const urlWithHost = routes.host + url;
+
+  return axios.get(urlWithHost)
+    .then((response) => response.data.contents);
+};
+
+const checkNewPosts = (url, state, callback) => {
+  setTimeout(() => {
+    get(url)
+      .then((contents) => {
+        callback(contents, state);
+        checkNewPosts(url, state, callback);
+      });
+  }, timeToCheck);
+};
+
+const addNewPosts = (data, state) => {
+  const { posts } = parser(data);
+  const oldPosts = state.posts.map((post) => {
+    const item = _.cloneDeep(post);
+    delete item.key;
+    return item;
+  });
+
+  const newPost = _.differenceWith(posts, oldPosts, _.isEqual);
+  if (newPost.length === 0) return;
+  // eslint-disable-next-line no-param-reassign
+  state.posts = [...posts, ...state.posts];
+};
+
 export default () => {
   const state = {
     urls: [],
@@ -88,6 +121,7 @@ export default () => {
 
   elements.modalBtnRead.textContent = i18next.t('buttons.read');
   elements.modalDismiss.textContent = i18next.t('buttons.close');
+  elements.btn.textContent = i18next.t('buttons.add');
 
   const formHandler = (target) => {
     const input = target.querySelector('input');
@@ -100,9 +134,9 @@ export default () => {
       watchState.feedback = '';
       watchState.form.proccessState = 'sending';
 
-      axios.get(routes.host + url)
-        .then((response) => {
-          const parse = parser(response.data.contents);
+      get(url)
+        .then((data) => {
+          const parse = parser(data);
           const idData = addIdParsedData(parse);
           const { feed, posts } = idData;
 
@@ -112,6 +146,8 @@ export default () => {
           watchState.form.url = '';
           watchState.feedback = i18next.t('success');
           watchState.form.proccessState = 'filling';
+
+          checkNewPosts(url, watchState, addNewPosts);
         })
         .catch(() => {
           watchState.form.valid = false;
