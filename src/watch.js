@@ -28,10 +28,6 @@ const makeModalButton = (key) => {
   button.setAttribute('data-key', `${key}`);
   button.textContent = i18next.t('buttons.show');
 
-  button.addEventListener('click', () => {
-
-  });
-
   return button;
 };
 
