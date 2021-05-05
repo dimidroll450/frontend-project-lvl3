@@ -5,6 +5,7 @@ export default {
       posts: 'Посты',
     },
     buttons: {
+      add: 'Добавить',
       show: 'Просмотр',
       read: 'Читать полностью',
       close: 'Закрыть',
