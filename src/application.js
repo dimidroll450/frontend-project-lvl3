@@ -119,7 +119,6 @@ export default () => {
 
   elements.modalBtnRead.textContent = i18next.t('buttons.read');
   elements.modalDismiss.textContent = i18next.t('buttons.close');
-  elements.btn.textContent = i18next.t('buttons.add');
 
   const formHandler = (target) => {
     const input = target.querySelector('input');

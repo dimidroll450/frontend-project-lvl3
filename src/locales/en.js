@@ -5,7 +5,6 @@ export default {
       posts: 'Posts',
     },
     buttons: {
-      add: 'Add',
       show: 'View',
       read: 'Read completely',
       close: 'Close',
