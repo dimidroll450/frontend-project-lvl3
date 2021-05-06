@@ -31,13 +31,20 @@ const makeModalButton = (key) => {
   return button;
 };
 
-const makePost = (post) => {
+const makePost = (post, visited) => {
   const { url, title, key } = post;
   const item = document.createElement('li');
   item.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start');
 
   const link = document.createElement('a');
-  link.classList.add('font-weight-bold');
+  link.setAttribute('data-key', `${key}`);
+
+  if (visited.has(key)) {
+    link.classList.add('font-weight-normal');
+  } else {
+    link.classList.add('font-weight-bold');
+  }
+
   link.setAttribute('target', '_blank');
   link.textContent = title;
   link.href = url;
@@ -71,7 +78,7 @@ const renderPosts = (state, posts) => {
   const list = document.createElement('ul');
   list.classList.add('list-group');
   state.posts.forEach((post) => {
-    const item = makePost(post);
+    const item = makePost(post, state.stateUI.visited);
     list.append(item);
   });
 
@@ -126,16 +133,19 @@ export default (state, elements) => onChange(state, (path, value) => {
       break;
   }
 
-  if (path.includes('modal')) {
+  if (path.startsWith('stateUI')) {
     switch (path) {
-      case 'modal.title':
-        modalTitle.textContent = state.modal.title;
+      case 'stateUI.modal.title':
+        modalTitle.textContent = state.stateUI.modal.title;
         break;
-      case 'modal.description':
-        modalBody.textContent = state.modal.description;
+      case 'stateUI.modal.description':
+        modalBody.textContent = state.stateUI.modal.description;
         break;
-      case 'modal.url':
-        modalBtnRead.href = state.modal.url;
+      case 'stateUI.modal.url':
+        modalBtnRead.href = state.stateUI.modal.url;
+        break;
+      case 'stateUI.visited':
+        renderPosts(state, elements.posts);
         break;
       default:
         break;

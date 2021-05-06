@@ -92,10 +92,13 @@ export default () => {
       url: '',
       valid: 'valid',
     },
-    modal: {
-      title: '',
-      description: '',
-      url: '',
+    stateUI: {
+      modal: {
+        title: '',
+        description: '',
+        url: '',
+      },
+      visited: new Set(),
     },
   };
 
@@ -159,13 +162,15 @@ export default () => {
   elements.posts.addEventListener('click', (e) => {
     const { target } = e;
     const key = target.getAttribute('data-key');
+
     if (key === null) return;
 
     const index = _.findIndex(watchState.posts, (o) => o.key === key);
     const data = watchState.posts[index];
-    watchState.modal.title = data.title;
-    watchState.modal.description = data.description;
-    watchState.modal.url = data.url;
+    watchState.stateUI.modal.title = data.title;
+    watchState.stateUI.modal.description = data.description;
+    watchState.stateUI.modal.url = data.url;
+    watchState.stateUI.visited.add(key);
   });
 
   elements.form.addEventListener('submit', (e) => {
