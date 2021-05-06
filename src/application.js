@@ -39,21 +39,18 @@ const validateURL = (url, urls) => {
   }
 };
 
-const addId = (data) => {
+const setId = (data, feedKey = '') => {
   const newData = _.cloneDeep(data);
   newData.key = _.uniqueId();
+
+  if (feedKey.length !== 0) {
+    newData.feedKey = feedKey;
+  }
+
   return newData;
 };
 
-const addIdParsedData = (data) => {
-  const oldFeed = data.feed;
-  const oldPosts = data.posts;
-
-  const feed = addId(oldFeed);
-  const posts = oldPosts.map((post) => addId(post));
-
-  return { feed, posts };
-};
+const setIdPosts = (posts, feedId) => posts.map((post) => setId(setId(post), feedId));
 
 const get = (url) => {
   const urlWithHost = routes.host + url;
@@ -74,16 +71,13 @@ const checkNewPosts = (url, state, callback) => {
 
 const addNewPosts = (data, state) => {
   const { posts } = parser(data);
-  const oldPosts = state.posts.map((post) => {
-    const item = _.cloneDeep(post);
-    delete item.key;
-    return item;
-  });
+  const oldPosts = state.posts;
 
-  const newPost = _.differenceWith(posts, oldPosts, _.isEqual);
-  if (newPost.length === 0) return;
+  const checknewPosts = _.differenceBy(posts, oldPosts, 'url');
+  if (checknewPosts.length === 0) return;
+  const newPosts = setIdPosts(checknewPosts);
   // eslint-disable-next-line no-param-reassign
-  state.posts = [...posts, ...state.posts];
+  state.posts = [...newPosts, ...state.posts];
 };
 
 export default () => {
@@ -137,8 +131,8 @@ export default () => {
       get(url)
         .then((data) => {
           const parse = parser(data);
-          const idData = addIdParsedData(parse);
-          const { feed, posts } = idData;
+          const feed = setId(parse.feed);
+          const posts = setIdPosts(parse.posts, feed.key);
 
           watchState.posts = [...posts, ...watchState.posts];
           watchState.feeds.unshift(feed);
