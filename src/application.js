@@ -72,12 +72,13 @@ const checkNewPosts = (url, state, callback) => {
 const addNewPosts = (data, state) => {
   const { posts } = parser(data);
   const oldPosts = state.posts;
+  const { feedKey } = oldPosts[0];
 
-  const checknewPosts = _.differenceBy(posts, oldPosts, 'url');
-  if (checknewPosts.length === 0) return;
-  const newPosts = setIdPosts(checknewPosts);
+  const newPosts = _.differenceBy(posts, oldPosts, 'url');
+  if (newPosts.length === 0) return;
+  const newPostswithId = setIdPosts(newPosts, feedKey);
   // eslint-disable-next-line no-param-reassign
-  state.posts = [...newPosts, ...state.posts];
+  state.posts = [...newPostswithId, ...state.posts];
 };
 
 export default () => {
