@@ -13,7 +13,7 @@ const routes = {
 };
 
 i18next.init({
-  lng: window.navigator.language,
+  lng: 'ru',
   debug: false,
   resources,
 });
