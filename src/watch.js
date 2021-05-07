@@ -135,13 +135,9 @@ export default (state, elements) => onChange(state, (path, value) => {
 
   if (path.startsWith('stateUI')) {
     switch (path) {
-      case 'stateUI.modal.title':
-        modalTitle.textContent = state.stateUI.modal.title;
-        break;
-      case 'stateUI.modal.description':
-        modalBody.textContent = state.stateUI.modal.description;
-        break;
       case 'stateUI.modal.url':
+        modalTitle.textContent = state.stateUI.modal.title;
+        modalBody.textContent = state.stateUI.modal.description;
         modalBtnRead.href = state.stateUI.modal.url;
         break;
       case 'stateUI.visited':
