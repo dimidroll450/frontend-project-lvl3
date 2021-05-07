@@ -65,10 +65,7 @@ const get = (url) => {
 
   return axios
     .get(urlWithHost)
-    .then((response) => {
-      console.log(response);
-      return response.data.contents;
-    })
+    .then((response) => response.data.contents)
     .catch(() => {
       throw new Error(errorsMessage.network);
     });
