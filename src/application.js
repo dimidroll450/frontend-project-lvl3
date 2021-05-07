@@ -159,7 +159,6 @@ export default () => {
           checkNewPosts(url, watchState, addNewPosts);
         })
         .catch((e) => {
-          console.log(e);
           watchState.form.valid = false;
           watchState.form.url = url;
           watchState.form.proccessState = 'filling';
