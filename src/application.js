@@ -52,11 +52,27 @@ const setId = (data, feedKey = '') => {
 
 const setIdPosts = (posts, feedId) => posts.map((post) => setId(setId(post), feedId));
 
-const get = (url) => {
-  const urlWithHost = routes.host + url;
+const generateUrl = (url, host = '') => {
+  const urlWithHost = new URL(host);
+  urlWithHost.searchParams.set('disableCache', true);
+  urlWithHost.searchParams.set('url', url);
 
-  return axios.get(urlWithHost)
-    .then((response) => response.data.contents);
+  return urlWithHost.toString();
+};
+
+const get = (url) => {
+  const urlWithHost = generateUrl(url, routes.host);
+
+  return axios
+    .get(urlWithHost)
+    .then((response) => {
+      console.log(response);
+      return response.data.contents;
+    })
+    .catch((e) => {
+      console.log(e.message);
+      console.log(e);
+    });
 };
 
 const checkNewPosts = (url, state, callback) => {
