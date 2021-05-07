@@ -1,6 +1,6 @@
 const parseToXml = (data) => {
   const parser = new DOMParser();
-  return parser.parseFromString(data, 'text/xml');
+  return parser.parseFromString(data, 'application/xhtml+xml');
 };
 
 const generateData = (element, parent = '') => {
