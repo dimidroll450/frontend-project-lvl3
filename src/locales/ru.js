@@ -13,6 +13,7 @@ export default {
       url: 'Ссылка должна быть валидным URL',
       dublicate: 'RSS уже существует',
       invalidData: 'Ресурс не содержит валидный RSS',
+      network: 'Ошибка сети',
     },
     success: 'RSS успешно загружен',
   },

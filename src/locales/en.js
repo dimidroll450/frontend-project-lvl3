@@ -13,6 +13,7 @@ export default {
       url: 'The link must be a valid URL',
       dublicate: 'RSS already exists',
       invalidData: 'Resource does not contain valid RSS',
+      network: 'Network error',
     },
     success: 'RSS downloaded successfully',
   },

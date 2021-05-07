@@ -1,7 +1,7 @@
 import * as yup from 'yup';
 import * as _ from 'lodash';
-import i18next from 'i18next';
 import axios from 'axios';
+import i18next from 'i18next';
 import resources from './locales';
 import parser from './parser';
 import watch from './watch';
@@ -21,7 +21,7 @@ i18next.init({
 const errorsMessage = {
   url: i18next.t('errors.url'),
   dublicate: i18next.t('errors.dublicate'),
-  invalidData: i18next.t('errors.invalidData'),
+  network: i18next.t('errors.network'),
 };
 
 const validateURL = (url, urls) => {
@@ -69,9 +69,8 @@ const get = (url) => {
       console.log(response);
       return response.data.contents;
     })
-    .catch((e) => {
-      console.log(e.message);
-      console.log(e);
+    .catch(() => {
+      throw new Error(errorsMessage.network);
     });
 };
 
@@ -162,11 +161,12 @@ export default () => {
 
           checkNewPosts(url, watchState, addNewPosts);
         })
-        .catch(() => {
+        .catch((e) => {
+          console.log(e);
           watchState.form.valid = false;
           watchState.form.url = url;
           watchState.form.proccessState = 'filling';
-          watchState.feedback = errorsMessage.invalidData;
+          watchState.feedback = e.message;
         });
     } else {
       watchState.form.valid = false;

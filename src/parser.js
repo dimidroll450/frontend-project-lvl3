@@ -1,6 +1,8 @@
+import i18next from 'i18next';
+
 const parseToXml = (data) => {
   const parser = new DOMParser();
-  return parser.parseFromString(data, 'application/xhtml+xml');
+  return parser.parseFromString(data, 'application/xml');
 };
 
 const generateData = (element, parent = '') => {
@@ -13,12 +15,17 @@ const generateData = (element, parent = '') => {
 };
 
 export default (data) => {
-  const parsed = parseToXml(data);
-  const feed = generateData(parsed, 'channel');
-  const items = parsed.querySelectorAll('item');
-  const arrItems = Array.prototype.slice.call(items);
+  try {
+    const parsed = parseToXml(data);
 
-  const posts = arrItems.map((post) => generateData(post));
+    const feed = generateData(parsed, 'channel');
+    const items = parsed.querySelectorAll('item');
+    const arrItems = Array.prototype.slice.call(items);
 
-  return { feed, posts: [...posts] };
+    const posts = arrItems.map((post) => generateData(post));
+
+    return { feed, posts: [...posts] };
+  } catch {
+    throw new Error(i18next.t('errors.invalidData'));
+  }
 };
